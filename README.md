@@ -15,6 +15,7 @@ Cyber-Sentinel is an OpenEnv-style reinforcement learning environment for **defe
 ## Important Links
 
 - **Live Hugging Face Space**: [Cyber-Sentinel Space](https://Dikz-1-cyber-sentinel-env30.hf.space)
+- **GitHub Repository**: [Dikshanta1/-cyber-sentinel-env30](https://github.com/Dikshanta1/-cyber-sentinel-env30)
 - **Training Notebook**: [Open in Colab](https://colab.research.google.com/drive/1iKvGT5XZi39vkFE759-rB9heZ8x5Ot7T?usp=sharing)
 - **Mini Writeup**: This README
 - **Live Demo UI**: [Cyber-Sentinel Space](https://Dikz-1-cyber-sentinel-env30.hf.space)

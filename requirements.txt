@@ -1,0 +1,6 @@
+pydantic
+openai
+fastapi
+uvicorn
+requests
+matplotlib

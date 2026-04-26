@@ -1,0 +1,15 @@
+name: cyber-sentinel-env
+description: A professional SOC incident-response RL environment where agents inspect realistic enterprise artifacts, correlate evidence, and submit machine-verifiable containment reports.
+version: 1.0.0
+theme: "Theme #3.1 Professional Tasks + Theme #2 Long-Horizon Planning"
+objective: "Train LLM agents to perform multi-step defensive security workflows with objective reward checks, process-aware partial credit, and anti-cheating guardrails."
+tasks:
+  - name: phishing_triage
+    difficulty: easy
+    objective: "Identify a phishing domain and blocking IP, then write final_report.json."
+  - name: policy_drift
+    difficulty: medium
+    objective: "Apply a changed network policy to endpoint evidence and produce a quarantine decision."
+  - name: incident_containment
+    difficulty: hard
+    objective: "Correlate SIEM, identity, and proxy logs into a containment plan."

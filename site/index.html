@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cyber-Sentinel — SOC RL Environment</title>
+    <meta name="description" content="Cyber-Sentinel: verifiable SOC incident-response RL environment (OpenEnv + TRL/Unsloth GRPO)." />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  </head>
+  <body class="bg-zinc-950 text-zinc-100">
+    <div class="min-h-screen">
+      <header class="border-b border-zinc-800 bg-zinc-950/80 backdrop-blur">
+        <div class="mx-auto max-w-6xl px-4 py-5 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+              <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-cyan-400 to-amber-400"></div>
+            <div>
+              <div class="text-lg font-semibold leading-tight">Cyber-Sentinel</div>
+              <div class="text-sm text-zinc-400">Live, verifiable SOC incident-response RL environment</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="statusDot" class="inline-block h-2 w-2 rounded-full bg-zinc-600"></span>
+            <span id="statusText" class="text-sm text-zinc-400">Checking API…</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="mx-auto max-w-6xl px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <section class="lg:col-span-7 space-y-6">
+          <div class="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5">
+            <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+              <div>
+                <div class="text-base font-semibold">Interactive Sandbox</div>
+                <div class="text-sm text-zinc-400">Inspect incident artifacts, write final_report.json, and get a verifiable reward.</div>
+              </div>
+              <div class="flex gap-2">
+                <select id="taskSelect" class="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm">
+                  <option value="phishing_triage">phishing_triage (easy)</option>
+                  <option value="policy_drift">policy_drift (medium)</option>
+                  <option value="incident_containment">incident_containment (hard)</option>
+                </select>
+                <button id="resetBtn" class="rounded-xl bg-zinc-100 text-zinc-950 px-4 py-2 text-sm font-semibold hover:bg-white">
+                  Reset
+                </button>
+              </div>
+            </div>
+
+            <div class="mt-4">
+              <label class="text-xs text-zinc-400">Command</label>
+              <div class="mt-1 flex gap-2">
+                <input
+                  id="commandInput"
+                  class="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-cyan-400/40"
+                  placeholder="e.g. find soc -maxdepth 5 -type f -print"
+                />
+                <button id="stepBtn" class="rounded-xl bg-cyan-400 text-zinc-950 px-4 py-2 text-sm font-semibold hover:bg-cyan-300">
+                  Step
+                </button>
+              </div>
+              <div class="mt-2 flex flex-wrap gap-2">
+                <button data-suggest="ls -la" class="suggest rounded-lg border border-zinc-800 px-3 py-1 text-xs text-zinc-300 hover:bg-zinc-900">ls -la</button>
+                <button data-suggest="find soc enterprise ops -maxdepth 5 -type f -print 2>/dev/null || true" class="suggest rounded-lg border border-zinc-800 px-3 py-1 text-xs text-zinc-300 hover:bg-zinc-900">find artifacts</button>
+                <button data-suggest="cat soc/cases/INC-1042/dns.log || true" class="suggest rounded-lg border border-zinc-800 px-3 py-1 text-xs text-zinc-300 hover:bg-zinc-900">cat dns.log</button>
+                <button data-suggest="printf %s '{&quot;incident_id&quot;:&quot;INC-1042&quot;,&quot;malicious_domain&quot;:&quot;login-update.secure-mail.example&quot;,&quot;block_ip&quot;:&quot;203.0.113.77&quot;,&quot;severity&quot;:&quot;high&quot;}' > final_report.json" class="suggest rounded-lg border border-zinc-800 px-3 py-1 text-xs text-zinc-300 hover:bg-zinc-900">write report</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5">
+            <div class="flex items-center justify-between">
+              <div class="text-base font-semibold">Observation</div>
+              <div class="flex items-center gap-3 text-sm">
+                <div class="text-zinc-400">Reward: <span id="rewardVal" class="text-zinc-100 font-semibold">—</span></div>
+                <div class="text-zinc-400">Done: <span id="doneVal" class="text-zinc-100 font-semibold">—</span></div>
+              </div>
+            </div>
+            <pre id="outputBox" class="mt-3 max-h-[380px] overflow-auto rounded-xl bg-zinc-950 border border-zinc-800 p-3 text-xs text-zinc-200 whitespace-pre-wrap">Click Reset, then Step to begin.</pre>
+          </div>
+        </section>
+
+        <aside class="lg:col-span-5 space-y-6">
+          <div class="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5">
+            <div class="text-base font-semibold">Reward Trace (this session)</div>
+            <div class="text-sm text-zinc-400">A live chart of reward returned by your verifier.</div>
+            <div class="mt-4">
+              <canvas id="rewardChart" height="160"></canvas>
+            </div>
+          </div>
+
+          <div class="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5">
+            <div class="text-base font-semibold">Project Links</div>
+            <div class="mt-3 space-y-2 text-sm">
+              <div class="flex items-center justify-between">
+                <span class="text-zinc-400">API</span>
+                <code class="text-zinc-200">/reset</code> <code class="text-zinc-200">/step</code> <code class="text-zinc-200">/state</code>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-zinc-400">Training</span>
+                <span class="text-zinc-200">`train_grpo.ipynb` (Colab)</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-zinc-400">Space</span>
+                <a class="text-cyan-300 hover:text-cyan-200" target="_blank" rel="noreferrer" href="https://dikz-1-cyber-sentinel-env.hf.space">Open</a>
+              </div>
+            </div>
+            <div class="mt-4 text-xs text-zinc-500">
+              This UI is intentionally lightweight (no build step). It’s a dynamic client for your OpenEnv-compatible API.
+            </div>
+          </div>
+        </aside>
+      </main>
+    </div>
+
+    <script src="/site/app.js"></script>
+  </body>
+</html>
